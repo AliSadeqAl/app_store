@@ -1,41 +1,118 @@
-import 'package:app_store/model.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'model.dart';
 
-class ShopProvider with ChangeNotifier{
-  List<Product> products =[
-    Product(id: 1, name: "Laptop", image: "image/Screenshot_٢٠٢٦٠٥٠١-٢١٠٨١٧_Google.jpg", price: 700, description: "Powerful Laptops", category: "Electronics"),
-    Product(id: 2, name: "Telephone", image: "image/180097.jpg", price: 200, description: "Good Telephones", category: "Electronics"),
-    Product(id: 3, name: "Headphone", image: "image/180098.jpg", price: 80, description: "Powerful Headphone", category: "Electronics"),
-    Product(id: 4, name: "Watches", image: "image/180099.jpg", price: 100, description: "Good Watches", category: "Electronics"),
-    Product(id: 5, name: "Football", image: "image/180100.jpg", price: 20, description: "Good ", category: "Sports"),
-    Product(id: 6, name: "Baskcetball", image: "image/180102.jpg", price: 30, description: "Good ", category: "Sports"),
-    Product(id: 7, name: "Tennis", image: "image/180101.jpg", price: 25, description: "Good ", category: "Sports"),
-    Product(id: 8, name: "Golf", image: "image/180103.jpg", price: 15, description: "Good ", category: "Sports"),
-    Product(id: 9, name: "Guitar", image: "image/180108.jpg", price: 1000, description: "Good ", category: "Music"),
-    Product(id: 10, name: "Piano", image: "image/180109.jpg", price: 1500, description: "Good ", category: "Music"),
-    Product(id: 11, name: "Violin ", image: "image/180111.jpg", price: 1200, description: "Good ", category: "Music"),
-    Product(id: 12, name: "Micrafon ", image: "image/180110.jpg", price: 900, description: "Good ", category: "Music"),
-    Product(id: 13, name: "Jacket ", image: "image/180106.jpg", price: 400, description: "Good Jacket", category: "Clothes"),
-    Product(id: 14, name: " Bag", image: "image/180104.jpg", price: 300, description: "Good Bag ", category: "Clothes"),
-    Product(id: 15, name: "Shoes ", image: "image/180105.jpg", price: 200, description: "Good Shoes", category: "Clothes"),
-    Product(id: 16, name: "Hat ", image: "image/180107.jpg", price: 50, description: "Good Hat", category: "Clothes"),
-  ];
+class ShopProvider with ChangeNotifier {
+  List<Product> products = [];
+  List<Product> cart = [];
+  List<Product> favorites = [];
 
-  List<String> categories =["Electronics", "Sports", "Music", "Clothes"];
-  List<Product> cart =[];
-  List<Product> favorites =[];
+  bool isLoading = false;
 
-  void addToCart(Product product){
+  ShopProvider() {
+    fetchProductsFromAPI();
+    loadFavorites();
+  }
+
+  // ✅ التصنيفات
+  List<String> get categories {
+    return products.map((p) => p.category).toSet().toList();
+  }
+
+  // ✅ جلب المنتجات من DummyJSON
+  Future<void> fetchProductsFromAPI() async {
+    const String apiUrl = "https://dummyjson.com/products";
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        products = (data['products'] as List)
+            .map((item) => Product.fromJson(item))
+            .toList();
+      } else {
+        print("Server Error: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Fetch Error: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // ✅ فلترة حسب التصنيف
+  List<Product> getProductsByCategory(String categoryName) {
+    return products.where((p) => p.category == categoryName).toList();
+  }
+
+  // ✅ السلة
+  void addToCart(Product product) {
     cart.add(product);
     notifyListeners();
   }
 
-  void addToFavorites(Product product){
-    favorites.add(product);
+  void removeFromCart(Product product) {
+    cart.removeWhere((p) => p.id == product.id);
     notifyListeners();
   }
 
-  List<Product> getProductsByCategory(String category){
-    return products.where((p) => p.category == category).toList();
+  // ✅ المفضلة
+  void toggleFavorite(Product product) {
+    final exists = favorites.any((p) => p.id == product.id);
+
+    if (exists) {
+      favorites.removeWhere((p) => p.id == product.id);
+    } else {
+      favorites.add(product);
+    }
+
+    notifyListeners();
+    saveFavoritesLocally();
+  }
+
+  // =========================
+  // 🔥 حفظ المفضلة محلياً
+  // =========================
+
+  Future<File> _getFavoritesFile() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return File('${dir.path}/favorites.json');
+  }
+
+  Future<void> saveFavoritesLocally() async {
+    final file = await _getFavoritesFile();
+    final data = favorites.map((p) => p.toJson()).toList();
+    await file.writeAsString(json.encode(data));
+  }
+
+  Future<void> loadFavorites() async {
+    try {
+      final file = await _getFavoritesFile();
+
+      if (await file.exists()) {
+        final content = await file.readAsString();
+
+        if (content.isNotEmpty) {
+          final decoded = json.decode(content);
+
+          favorites = (decoded as List)
+              .map((item) => Product.fromJson(item))
+              .toList();
+
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      print("Favorites Load Error: $e");
+    }
   }
 }
