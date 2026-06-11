@@ -8,32 +8,26 @@ class CartScreen extends StatelessWidget {
     var provider = Provider.of<ShopProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text("السلة")),
+      appBar: AppBar(title: const Text("السلة")),
       body: provider.cart.isEmpty
-          ? Center(
-              child: Text(
-                "السلة فارغة",
-                style: TextStyle(fontSize: 20),
-              ),
-            )
+          ? const Center(child: Text("السلة فارغة", style: TextStyle(fontSize: 20)))
           : ListView.builder(
               itemCount: provider.cart.length,
               itemBuilder: (context, index) {
                 var item = provider.cart[index];
                 return Card(
-                  margin: EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(10),
                   child: ListTile(
-                    // تحديث لعرض صور الإنترنت من الـ API
                     leading: Image.network(
                       item.image, 
                       width: 60, 
                       height: 60,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
                     ),
                     title: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                     subtitle: Text("\$${item.price}"),
-                    trailing: Icon(Icons.shopping_cart, color: Colors.blue),
+                    trailing: const Icon(Icons.shopping_cart, color: Colors.blue),
                   ),
                 );
               },

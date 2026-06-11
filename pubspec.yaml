@@ -14,10 +14,13 @@ dependencies:
 
   provider: ^6.0.5
   cupertino_icons: ^1.0.8
-  
-  # المكتبات المضافة للتعامل مع الـ API والمجلدات المحلية
   http: ^1.1.0
   path_provider: ^2.1.1
+  
+  # مكتبات Firebase المضافة للمرحلة الثانية
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.16.0
+  cloud_firestore: ^4.14.0
 
 dev_dependencies:
   flutter_test:

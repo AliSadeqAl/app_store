@@ -16,7 +16,7 @@ class ProductDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(product.name)),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -26,34 +26,35 @@ class ProductDetailsScreen extends StatelessWidget {
                 product.image, 
                 height: 300, 
                 width: double.infinity, 
-                fit: BoxFit.contain
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 100),
               ),
             ),
-            SizedBox(height: 20),
-            Text(product.name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            Text("\$${product.price}", style: TextStyle(fontSize: 22, color: Colors.blue, fontWeight: FontWeight.bold)),
-            SizedBox(height: 15),
+            const SizedBox(height: 20),
+            Text(product.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Text("\$${product.price}", style: const TextStyle(fontSize: 22, color: Colors.blue, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 15),
             Text(product.description, style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             
             ElevatedButton.icon(
               onPressed: () {
                 provider.addToCart(product);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("تمت إضافة المنتج للسلة"), backgroundColor: Colors.green),
+                  const SnackBar(content: Text("تمت إضافة المنتج للسلة"), backgroundColor: Colors.green),
                 );
               },
-              icon: Icon(Icons.shopping_cart),
-              label: Text("إضافة للسلة"),
+              icon: const Icon(Icons.shopping_cart),
+              label: const Text("إضافة للسلة"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
-                minimumSize: Size(double.infinity, 50),
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             
             ElevatedButton.icon(
               onPressed: () {
@@ -70,7 +71,7 @@ class ProductDetailsScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: isFav ? Colors.grey[600] : const Color.fromARGB(255, 146, 21, 13),
                 foregroundColor: Colors.white,
-                minimumSize: Size(double.infinity, 50),
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
